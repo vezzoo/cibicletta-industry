@@ -1,6 +1,6 @@
 export default class FiglioAlreadyExistsException extends Error {
 
-    constructor(text = "") {
+    constructor(text = "FiglioAlreadyExistsException") {
         super(text);
     }
 

@@ -1,6 +1,6 @@
 export default class RepartoAlreadyExistsException extends Error {
 
-    constructor(text = "") {
+    constructor(text = "RepartoAlreadyExistsException") {
         super(text);
     }
 

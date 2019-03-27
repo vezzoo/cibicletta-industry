@@ -1,10 +1,13 @@
 import RepartoAlreadyExistsException from "../exceptions/RepartoAlreadyExistsException";
+import FiglioAlreadyExistsException from "../exceptions/FiglioAlreadyExistsException";
+import NoDutyAvailableException from "../exceptions/NoDutyAvailableException";
 
 export default class Prodotto {
 
-    constructor(codice, descrizione, produzione) {
+    constructor(codice, descrizione, produzione, giacenza = 0) {
         this.codice = codice;
         this.descrizione = descrizione;
+        this.giacenza = giacenza;
 
         /**
          * Contiene oggetti:
@@ -14,7 +17,7 @@ export default class Prodotto {
          *  }
          * @type {Array}
          */
-        this.reparti = [];
+        this.reparti = {};
 
         /**
          * Contiene oggetti:
@@ -32,23 +35,37 @@ export default class Prodotto {
         this.produzione = produzione;
     }
 
-    addReparto(reparto, tempo) {
-        if (this.reparti.reduce((a, v) => {
-            a = a || v.reparto.equals(reparto);
-        }, false))
+    addReparto(reparto, tempo, difficolta) {
+        if (this.reparti[reparto.nome])
             throw new RepartoAlreadyExistsException();
 
-        this.reparti.push({
+        this.reparti[reparto.nome] = {
             reparto: reparto,
-            time: tempo
-        });
+            time: tempo,
+            diff: difficolta
+        };
 
         return this;
     }
 
-    addFiglio(figlio, qta){
+    getReparto(qta, data) {
+        let reparto = null;
+        let tempo = 100000000000000;
+
+        Object.keys(this.reparti).forEach(i => {
+            if (this.reparti[i].reparto.isDutyAvailable(this, qta, data) && tempo > this.reparti[i].time) {
+                reparto = this.reparti[i].reparto;
+                tempo = this.reparti[i].time;
+            }
+        });
+
+        if (reparto === null) throw new NoDutyAvailableException();
+        return reparto;
+    }
+
+    addFiglio(figlio, qta) {
         if (this.figli.reduce((a, v) => {
-            a = a || v.figlio.equals(figlio);
+            return a || v.figlio.equals(figlio);
         }, false))
             throw new FiglioAlreadyExistsException();
 
@@ -60,7 +77,7 @@ export default class Prodotto {
         return this;
     }
 
-    equals(prodotto){
+    equals(prodotto) {
         return this.codice === prodotto.codice;
     }
 

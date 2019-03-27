@@ -4,16 +4,64 @@ import Reparto from "./Reparto";
 export default class WBS {
 
     constructor() {
-        WBS.populateProdotti();
-        WBS.populateReparti();
+        this.reparti = WBS.populateReparti();
+        this.prodotti = WBS.populateProdotti(this.reparti);
     }
 
-    static populateProdotti() {
+    /**
+     * @param cliente: nome del cliente
+     * @param codiceOrdine: codice dell'ordine
+     * @param distinta: contenuto dell'ordine, array di oggetti
+     * {
+     *      prodotto: codice prodotto ordinato,
+     *      qta: quantita ordinata
+     * }
+     * @param dataConsegna: termine massimo
+     */
+    ordineUtente(cliente, codiceOrdine, distinta, dataConsegna) {
+        distinta.forEach(prod => {
+
+            const necessitaProduzione = [];
+            const necessitaOrdine = [];
+
+            let prodotto = this.prodotti[prod.prodotto];
+            let ordinato = prod.qta;
+            let fabbisogno = ordinato - prodotto.giacenza;
+
+            if(fabbisogno > 0)
+                WBS._buildOrder(prodotto, ordinato, dataConsegna, necessitaProduzione, necessitaOrdine)
+
+            console.log(necessitaOrdine, necessitaProduzione)
+        })
+    }
+
+    static _buildOrder(prodotto, qta, entro, dafare, dacomprare){
+
+        if(prodotto.produzione === "ESTERNA"){
+            dacomprare.push({
+                prodotto: prodotto,
+                qta: qta,
+                entro: entro
+            });
+            return;
+        }
+
+        let reparto = prodotto.getReparto(qta, entro);
+        reparto.registerDuty(prodotto, qta, entro);
+        dafare.push({
+            prodotto: prodotto,
+            qta: qta,
+            entro: entro
+        });
+        prodotto.figli.forEach(e => {
+            WBS._buildOrder(e.figlio, e.qta, entro.setDate(entro.getDate() - prodotto.reparti[reparto.nome].time), dafare, dacomprare)
+        });
+    }
+
+    static populateProdotti(reparti) {
         //todo implementazione reale
 
         const prodotti = {};
-
-        //4363788, 0.01
 
         const fetched = [
             new Prodotto("A1.01", "Bici donna senza cambio bianca", "INTERNA"),
@@ -30,6 +78,7 @@ export default class WBS {
             new Prodotto("V.01", "Verrniciatura bianca", "ESTERNA")
         ];
 
+        //assegnazione figli
         fetched[0].addFiglio(fetched[1], 2);
         fetched[0].addFiglio(fetched[2], 1);
         fetched[0].addFiglio(fetched[3], 1);
@@ -41,7 +90,23 @@ export default class WBS {
         fetched[2].addFiglio(fetched[7], 1);
         fetched[2].addFiglio(fetched[8], 0.15);
 
-        console.log(fetched)
+        //assegnazione reparti
+        fetched[0].addReparto(reparti["CF1"], 1, 1);
+        fetched[0].addReparto(reparti["CF2"], 2, 3);
+
+        fetched[1].addReparto(reparti["SLDMNT"], 1, 1);
+        fetched[2].addReparto(reparti["SLDMNT"],2,1);
+        fetched[3].addReparto(reparti["AF"],3,1);
+
+        fetched[4].addReparto(reparti["SLDMNT"],1, 1);
+        fetched[5].addReparto(reparti["SLDMNT"],1, 1);
+        fetched[6].addReparto(reparti["SLDMNT"],1, 1);
+
+        fetched[7].addReparto(reparti["MC"],1, 1);
+        fetched[8].addReparto(reparti["V"],1, 1);
+
+        fetched.forEach(e => prodotti[e.codice] = e);
+        return prodotti;
     }
 
     static populateReparti() {
@@ -50,14 +115,16 @@ export default class WBS {
         const reparti = {};
 
         const fetched = [
-            new Reparto("CF", "Collaudo finale"),
+            new Reparto("CF1", "Collaudo finale 1"),
             new Reparto("IF", "Imballaggio finale"),
             new Reparto("AF", "Assemblaggio finale"),
             new Reparto("SLDMNT", "Saldatura e montaggio ruote"),
             new Reparto("MC", "Montaggio cambi"),
             new Reparto("V", "Verniciatura"),
+            new Reparto("CF2", "Collaudo finale 2"),
         ];
 
-        console.log(fetched)
+        fetched.forEach(e => reparti[e.nome] = e);
+        return reparti;
     }
 }

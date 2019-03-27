@@ -1,0 +1,3 @@
+[submodule "libs/node-pdfgen"]
+	path = libs/node-pdfgen
+	url = https://github.com/tetofonta/node-pdfgen

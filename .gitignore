@@ -1,0 +1,5 @@
+*.pdf
+*.log
+node_modules
+.idea/*
+yarn.lock

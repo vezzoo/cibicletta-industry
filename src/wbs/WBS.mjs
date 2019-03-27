@@ -19,20 +19,22 @@ export default class WBS {
      * @param dataConsegna: termine massimo
      */
     ordineUtente(cliente, codiceOrdine, distinta, dataConsegna) {
+
+        const necessitaProduzione = [];
+        const necessitaOrdine = [];
+
         distinta.forEach(prod => {
-
-            const necessitaProduzione = [];
-            const necessitaOrdine = [];
-
             let prodotto = this.prodotti[prod.prodotto];
             let ordinato = prod.qta;
             let fabbisogno = ordinato - prodotto.giacenza;
 
             if(fabbisogno > 0)
-                WBS._buildOrder(prodotto, ordinato, dataConsegna, necessitaProduzione, necessitaOrdine)
-
-            console.log(necessitaOrdine, necessitaProduzione)
-        })
+                WBS._buildOrder(prodotto, ordinato, dataConsegna, necessitaProduzione, necessitaOrdine);
+        });
+        return {
+            prod: necessitaProduzione,
+            buy: necessitaOrdine
+        }
     }
 
     static _buildOrder(prodotto, qta, entro, dafare, dacomprare){
@@ -54,7 +56,7 @@ export default class WBS {
             entro: entro
         });
         prodotto.figli.forEach(e => {
-            WBS._buildOrder(e.figlio, e.qta, entro.setDate(entro.getDate() - prodotto.reparti[reparto.nome].time), dafare, dacomprare)
+            WBS._buildOrder(e.figlio, e.qta, new Date(entro.setDate(entro.getDate() - prodotto.reparti[reparto.nome].time)), dafare, dacomprare)
         });
     }
 
@@ -108,7 +110,6 @@ export default class WBS {
         fetched.forEach(e => prodotti[e.codice] = e);
         return prodotti;
     }
-
     static populateReparti() {
         //todo implementazione reale
 

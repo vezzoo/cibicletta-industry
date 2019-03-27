@@ -13,7 +13,7 @@ export default class Reparto {
         let tempoDiProd = prodotto.reparti[this.nome].time;
 
         for (let i = 0; i < tempoDiProd; i++) {
-            const day = data.setDate(data.getDate() - 1);
+            const day = new Date(data.setDate(data.getDate() - 1));
             if (!this.schedule[day])
                 this.schedule[day] = [];
 
@@ -38,7 +38,7 @@ export default class Reparto {
         let diff = prodotto.reparti[this.nome].diff;
         let val = true;
         for (let i = 0; i < tempoDiProd; i++) {
-            const day = data.setDate(data.getDate() - 1);
+            const day = new Date(data.setDate(data.getDate() - 1));
             val = val && (this.getDailyDuty(day) + diff * qta) < (this.maxDuty * (1 + maxOverhead / 100));
         }
         return val;

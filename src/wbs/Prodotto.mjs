@@ -81,4 +81,7 @@ export default class Prodotto {
         return this.codice === prodotto.codice;
     }
 
+    toString(){
+        return this.codice + "--" + this.descrizione;
+    }
 }

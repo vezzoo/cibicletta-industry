@@ -8,6 +8,13 @@
     "debug": "node --experimental-modules $NODE_DEBUG_OPTION ./src/index.mjs"
   },
   "dependencies": {
-    "pdfgen": "file:./libs/node-pdfgen"
+    "mysql2": "^1.6.5",
+    "mariadb": "^2.0.3",
+    "tedious": "^6.1.0",
+    "pg": "^7.9.0",
+    "pg-hstore": "^2.3.2",
+    "pdfgen": "file:./libs/node-pdfgen",
+    "sequelize": "^5.2.1",
+    "@types/sequelize": "^4.27.44"
   }
 }

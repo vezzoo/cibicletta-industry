@@ -1,11 +1,14 @@
 import Prodotto from "./Prodotto";
 import Reparto from "./Reparto";
+import getConnection from "../persistence/db.connect"
+import Sequelize from "sequelize";
 
 export default class WBS {
 
-    constructor() {
-        this.reparti = WBS.populateReparti();
-        this.prodotti = WBS.populateProdotti(this.reparti);
+    async init(){
+        this.reparti = await WBS.populateReparti();
+        this.prodotti = await WBS.populateProdotti(this.reparti);
+        return this;
     }
 
     /**
@@ -41,7 +44,7 @@ export default class WBS {
 
         if(prodotto.produzione === "ESTERNA"){
             dacomprare.push({
-                prodotto: prodotto,
+                prodotto: prodotto.codice,
                 qta: qta,
                 entro: entro
             });
@@ -51,7 +54,7 @@ export default class WBS {
         let reparto = prodotto.getReparto(qta, entro);
         reparto.registerDuty(prodotto, qta, entro);
         dafare.push({
-            prodotto: prodotto,
+            prodotto: prodotto.codice,
             qta: qta,
             entro: entro
         });
@@ -60,72 +63,48 @@ export default class WBS {
         });
     }
 
-    static populateProdotti(reparti) {
-        //todo implementazione reale
-
+    static async populateProdotti(reparti) {
         const prodotti = {};
 
-        const fetched = [
-            new Prodotto("A1.01", "Bici donna senza cambio bianca", "INTERNA"),
+        let sons;
+        let production;
+        let rows = await getConnection("Products").findAll({
+            attributes: ['codice', 'description', 'production']
+        });
 
-            new Prodotto("RA", "Ruota di tipo A", "INTERNA"),
-            new Prodotto("TA1.01", "Telaio di tipo A1 bianca", "INTERNA"),
-            new Prodotto("MA", "Manubrio di tipo A1", "ESTERNA"),
+        for(let e of rows)
+            prodotti[e.codice] = new Prodotto(e.codice, e.description, e.production);
 
-            new Prodotto("RA", "Raggio di tipo A", "ESTERNA"),
-            new Prodotto("CA", "Cerchione di tipo A", "ESTERNA"),
-            new Prodotto("GA", "Gomma di tipo A", "ESTERNA"),
+        for(let e of rows){
+            sons = await getConnection("Products_sons").findAll({
+                where: {father: e.codice},
+                attributes: ["son", "qta"]
+            });
 
-            new Prodotto("TA1", "Telaio di tipo A1", "ESTERNA"),
-            new Prodotto("V.01", "Verrniciatura bianca", "ESTERNA")
-        ];
+            production = await getConnection("Product_Divisions").findAll({
+                where: {prodotto: e.codice},
+                attributes: ["reparto", "tempo_produzione", "difficolta"]
+            });
 
-        //assegnazione figli
-        fetched[0].addFiglio(fetched[1], 2);
-        fetched[0].addFiglio(fetched[2], 1);
-        fetched[0].addFiglio(fetched[3], 1);
+            sons.forEach(s => prodotti[e.codice].addFiglio(prodotti[s.son], s.qta));
+            production.forEach(s => prodotti[e.codice].addReparto(reparti[s.reparto], s.tempo_produzione, s.difficolta));
+        }
 
-        fetched[1].addFiglio(fetched[4], 36);
-        fetched[1].addFiglio(fetched[5], 1);
-        fetched[1].addFiglio(fetched[6], 1);
+        console.log(`Populated products with ${rows.length} elements, ${sons.length} hierarchy and ${production.length} divisions.`);
 
-        fetched[2].addFiglio(fetched[7], 1);
-        fetched[2].addFiglio(fetched[8], 0.15);
-
-        //assegnazione reparti
-        fetched[0].addReparto(reparti["CF1"], 1, 1);
-        fetched[0].addReparto(reparti["CF2"], 2, 3);
-
-        fetched[1].addReparto(reparti["SLDMNT"], 1, 1);
-        fetched[2].addReparto(reparti["SLDMNT"],2,1);
-        fetched[3].addReparto(reparti["AF"],3,1);
-
-        fetched[4].addReparto(reparti["SLDMNT"],1, 1);
-        fetched[5].addReparto(reparti["SLDMNT"],1, 1);
-        fetched[6].addReparto(reparti["SLDMNT"],1, 1);
-
-        fetched[7].addReparto(reparti["MC"],1, 1);
-        fetched[8].addReparto(reparti["V"],1, 1);
-
-        fetched.forEach(e => prodotti[e.codice] = e);
         return prodotti;
     }
-    static populateReparti() {
-        //todo implementazione reale
+    static async populateReparti() {
 
         const reparti = {};
 
-        const fetched = [
-            new Reparto("CF1", "Collaudo finale 1"),
-            new Reparto("IF", "Imballaggio finale"),
-            new Reparto("AF", "Assemblaggio finale"),
-            new Reparto("SLDMNT", "Saldatura e montaggio ruote"),
-            new Reparto("MC", "Montaggio cambi"),
-            new Reparto("V", "Verniciatura"),
-            new Reparto("CF2", "Collaudo finale 2"),
-        ];
+        let rows = await getConnection("Divisions").findAll({
+            attributes: ['codice', 'description', 'caricoMassimo']
+        });
+        rows.forEach(e => reparti[e.codice] = new Reparto(e.codice, e.description, e.caricoMassimo));
 
-        fetched.forEach(e => reparti[e.nome] = e);
+        console.log(`Populated divisions with ${rows.length} elements.`);
+
         return reparti;
     }
 }

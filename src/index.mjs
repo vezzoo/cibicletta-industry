@@ -1,21 +1,24 @@
 import WBS from "./wbs/WBS";
+import {connect} from "./persistence/db.connect"
 
-const engine = new WBS();
-let data = new Date();
-engine.ordineUtente("tetofonta", "vezzoo", [
-    {
-        prodotto: "A1.01",
-        qta: 2
-    },
-    {
-        prodotto: "MA",
-        qta: 1
-    }
-], data);
-
-engine.ordineUtente("tetofonta", "vezzoo", [
-    {
-        prodotto: "A1.01",
-        qta: 2
-    }
-], data);
+connect()
+    .then(() => new WBS().init())
+    .then((engine) => {
+        let data = new Date();
+        console.log(engine.ordineUtente("tetofonta", "vezzoo", [
+            {
+                prodotto: "A1.01",
+                qta: 2
+            },
+            {
+                prodotto: "MNA",
+                qta: 1
+            }
+        ], data));
+        console.log(engine.ordineUtente("tetofonta", "vezzoo", [
+            {
+                prodotto: "A1.01",
+                qta: 2
+            }
+        ], data));
+    });

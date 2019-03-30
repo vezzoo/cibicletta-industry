@@ -1,0 +1,8 @@
+{
+  "order": [
+    "Divisions.mjs",
+    "Products.mjs",
+    "Product_Divisions.mjs",
+    "Products_sons.mjs"
+  ]
+}

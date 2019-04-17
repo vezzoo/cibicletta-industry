@@ -1,7 +1,7 @@
 {
   "name": "cibiclette",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.mjs",
   "license": "MIT",
   "scripts": {
     "start_backend": "node --experimental-modules src/BACKEND/index.mjs"
@@ -9,6 +9,14 @@
   "dependencies": {
     "pdfgen": "file:./libs/node-pdfgen",
     "express": "^4.16.4",
-    "methods": "^1.1.2"
+    "methods": "^1.1.2",
+    "mysql2": "^1.6.5",
+    "mariadb": "^2.0.3",
+    "tedious": "^6.1.0",
+    "pg": "^7.9.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^5.2.1",
+    "@types/sequelize": "^4.27.44",
+    "jsonwebtoken": "^8.5.1"
   }
 }

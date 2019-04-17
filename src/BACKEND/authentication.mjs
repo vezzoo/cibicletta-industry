@@ -1,3 +1,5 @@
+import database from "../persistence/db.connect"
+
 const header = "auth";
 const bearer = "giovanni";
 

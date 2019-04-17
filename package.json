@@ -4,9 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node --experimental-modules index.js"
+    "start_backend": "node --experimental-modules src/BACKEND/index.mjs"
   },
   "dependencies": {
-    "pdfgen": "file:./libs/node-pdfgen"
+    "pdfgen": "file:./libs/node-pdfgen",
+    "express": "^4.16.4",
+    "methods": "^1.1.2"
   }
 }

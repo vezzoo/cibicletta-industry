@@ -5,7 +5,9 @@
   "license": "MIT",
   "scripts": {
     "start": "node --experimental-modules ./src/index.mjs",
-    "debug": "node --experimental-modules $NODE_DEBUG_OPTION ./src/index.mjs"
+    "debug": "node --experimental-modules $NODE_DEBUG_OPTION ./src/index.mjs",
+    "test": "node --require esm ./node_modules/mocha/bin/_mocha test/**/*.test.js",
+    "documentazione": "(mkdir ./docs || true) && cd documentazione && pdflatex -interaction=nonstopmode -output-format=pdf -output-directory=../docs documentazione.tex"
   },
   "dependencies": {
     "mysql2": "^1.6.5",
@@ -16,5 +18,13 @@
     "pdfgen": "file:./libs/node-pdfgen",
     "sequelize": "^5.2.1",
     "@types/sequelize": "^4.27.44"
+  },
+  "devDependencies": {
+    "mocha": "^6.0.2",
+    "expect.js": "^0.3.1",
+    "esm": "^3.2.22"
+  },
+  "esm": {
+    "cjs": true
   }
 }

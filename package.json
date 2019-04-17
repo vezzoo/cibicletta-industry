@@ -4,7 +4,8 @@
   "main": "src/index.mjs",
   "license": "MIT",
   "scripts": {
-    "start_backend": "node --experimental-modules src/BACKEND/index.mjs"
+    "start_backend": "node --experimental-modules src/BACKEND/index.mjs",
+    "generate_certs": "openssl genrsa -out ./src/BACKEND/jwt.crt 4096 && openssl rsa -pubout -in ./src/BACKEND/jwt.crt -out ./src/BACKEND/jwt.key"
   },
   "dependencies": {
     "pdfgen": "file:./libs/node-pdfgen",
